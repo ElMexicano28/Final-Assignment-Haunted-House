@@ -35,9 +35,26 @@ public class Observer : MonoBehaviour
 
             if (Physics.Raycast(ray, out raycastHit))
             {
-                if (raycastHit.collider.transform == player)
+                // handles child colliders
+                var playerMovement = raycastHit.collider.GetComponentInParent<PlayerMovement>();
+                if (playerMovement == null)
                 {
-                    gameEnding.CaughtPlayer();
+                    // if ray directly hit assigned player transform
+                    if (raycastHit.collider.transform == player)
+                    {
+                        // try to get PlayerMovement from the player Transform
+                        playerMovement = player.GetComponent<PlayerMovement>();
+                    }
+                }
+
+                if (playerMovement != null)
+                {
+                    // Ask player if this hit should registe, TryRegisterHit handles cooldown and shield consumption
+                    bool shouldBeCaught = playerMovement.TryRegisterHit();
+                    if (shouldBeCaught)
+                    {
+                        gameEnding.CaughtPlayer();
+                    }
                 }
             }
         }
